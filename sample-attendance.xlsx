@@ -1,0 +1,22 @@
+Employee Name	Date	In-Time	Out-Time
+John Doe	01-01-2024	10:00	18:30
+John Doe	02-01-2024	10:15	18:45
+John Doe	03-01-2024		
+John Doe	04-01-2024	09:45	18:15
+John Doe	05-01-2024	10:30	19:00
+John Doe	06-01-2024	10:00	14:00
+John Doe	08-01-2024	10:00	18:30
+Jane Smith	01-01-2024	09:50	18:20
+Jane Smith	02-01-2024	10:05	18:35
+Jane Smith	03-01-2024	10:20	18:50
+Jane Smith	04-01-2024		
+Jane Smith	05-01-2024	10:00	18:30
+Jane Smith	06-01-2024	10:15	14:15
+Jane Smith	08-01-2024	09:55	18:25
+Mike Johnson	01-01-2024	10:10	18:40
+Mike Johnson	02-01-2024		
+Mike Johnson	03-01-2024	10:00	18:30
+Mike Johnson	04-01-2024	10:25	18:55
+Mike Johnson	05-01-2024	09:45	18:15
+Mike Johnson	06-01-2024		
+Mike Johnson	08-01-2024	10:05	18:35
