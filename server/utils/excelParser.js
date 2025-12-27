@@ -21,24 +21,52 @@ const parseExcelFile = async (filePath) => {
 
       if (!employeeName || !dateValue) return;
 
-      // Parse date
+      // Parse date - handle various formats
       let date;
       if (dateValue instanceof Date) {
         date = moment(dateValue);
       } else if (typeof dateValue === 'string') {
-        date = moment(dateValue, ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY']);
+        date = moment(dateValue, ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY', 'DD-MM-YYYY', 'MM-DD-YYYY']);
+      } else if (typeof dateValue === 'number') {
+        // Handle Excel serial date numbers
+        date = moment(new Date((dateValue - 25569) * 86400 * 1000));
       } else {
         return; // Skip invalid dates
       }
 
       if (!date.isValid()) return;
 
-      const dayOfWeek = date.format('dddd');
       const expectedHours = getExpectedHours(date.toDate());
 
-      // Convert time values to string format
-      const inTimeStr = inTime ? (typeof inTime === 'string' ? inTime : moment(inTime, 'HH:mm').format('HH:mm')) : null;
-      const outTimeStr = outTime ? (typeof outTime === 'string' ? outTime : moment(outTime, 'HH:mm').format('HH:mm')) : null;
+      // Convert time values to string format - handle various time formats
+      let inTimeStr = null;
+      let outTimeStr = null;
+
+      if (inTime) {
+        if (typeof inTime === 'string') {
+          inTimeStr = inTime;
+        } else if (inTime instanceof Date) {
+          inTimeStr = moment(inTime).format('HH:mm');
+        } else if (typeof inTime === 'number') {
+          // Handle Excel time serial numbers (fraction of a day)
+          const hours = Math.floor(inTime * 24);
+          const minutes = Math.floor((inTime * 24 * 60) % 60);
+          inTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
+
+      if (outTime) {
+        if (typeof outTime === 'string') {
+          outTimeStr = outTime;
+        } else if (outTime instanceof Date) {
+          outTimeStr = moment(outTime).format('HH:mm');
+        } else if (typeof outTime === 'number') {
+          // Handle Excel time serial numbers (fraction of a day)
+          const hours = Math.floor(outTime * 24);
+          const minutes = Math.floor((outTime * 24 * 60) % 60);
+          outTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
 
       const workedHours = calculateWorkedHours(inTimeStr, outTimeStr);
       const status = getAttendanceStatus(inTimeStr, outTimeStr, expectedHours, workedHours);
@@ -56,6 +84,7 @@ const parseExcelFile = async (filePath) => {
 
     return attendanceData;
   } catch (error) {
+    console.error('Excel parsing error:', error);
     throw new Error(`Excel parsing failed: ${error.message}`);
   }
 };
