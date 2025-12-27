@@ -39,8 +39,15 @@ if (process.env.NODE_ENV !== 'production') {
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://leave-productivity-analyzer.vercel.app', 'https://leave-productivity-analyzer-git-main-chouhangourav756-7067s-projects.vercel.app']
-    : ['http://localhost:3000'],
+    ? [
+      'https://leave-productivity-analyzer.vercel.app',
+      'https://leave-productivity-analyzer-git-main-chouhangourav756-7067s-projects.vercel.app',
+      'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app'
+    ]
+    : [
+      'http://localhost:3000',
+      'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app'
+    ],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
