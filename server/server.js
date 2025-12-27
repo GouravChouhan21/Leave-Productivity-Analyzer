@@ -1,110 +1,90 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const connectDB = require("./config/db");
-const attendanceRoutes = require("./routes/attendanceRoutes");
-const Employee = require("./models/Employee");
-const Attendance = require("./models/Attendance");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const Employee = require('./models/Employee');
+const Attendance = require('./models/Attendance');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
-/* =======================
-   DATABASE INITIALIZATION
-======================= */
+// Connect to MongoDB and clean up indexes
 const initializeDatabase = async () => {
   await connectDB();
 
-  if (process.env.NODE_ENV !== "production") {
-    try {
-      await Employee.collection.drop();
-      await Attendance.collection.drop();
-      console.log("Database collections reset (dev only)");
-    } catch {
-      console.log("Collections already exist");
+  try {
+    // Only drop collections in development
+    if (process.env.NODE_ENV !== 'production') {
+      await Employee.collection.drop().catch(() => { });
+      await Attendance.collection.drop().catch(() => { });
+      console.log('Database collections reset successfully');
     }
+  } catch (error) {
+    console.log('Database collections already clean or first run');
   }
 };
 
 initializeDatabase();
 
-/* =======================
-   CORS CONFIG (FIXED)
-======================= */
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "https://leave-productivity-analyzer1-black.vercel.app",
-  "https://leave-productivity-analyzer.vercel.app",
-];
+// Create uploads directory if it doesn't exist (for local development)
+if (process.env.NODE_ENV !== 'production') {
+  const uploadsDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+}
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Postman, curl
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      callback(new Error("CORS not allowed"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Middleware
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://leave-productivity-analyzer.vercel.app', 'https://leave-productivity-analyzer-git-main-chouhangourav756-7067s-projects.vercel.app']
+    : ['http://localhost:3000'],
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Handle preflight
-app.options("*", cors());
+// Routes
+app.use('/api/attendance', attendanceRoutes);
 
-/* =======================
-   BODY PARSERS
-======================= */
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-/* =======================
-   ROUTES
-======================= */
-app.use("/api/attendance", attendanceRoutes);
-
-/* =======================
-   HEALTH CHECK
-======================= */
-app.get("/api/health", (req, res) => {
+// Health check
+app.get('/api/health', (req, res) => {
   res.json({
-    status: "OK",
-    env: process.env.NODE_ENV,
+    message: 'Server is running',
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
   });
 });
 
-/* =======================
-   ROOT
-======================= */
-app.get("/", (req, res) => {
+// Root route
+app.get('/', (req, res) => {
   res.json({
-    message: "Leave & Productivity Analyzer API",
+    message: 'Leave & Productivity Analyzer API',
+    version: '1.0.0',
     endpoints: [
-      "POST /api/attendance/upload",
-      "GET /api/attendance/dashboard",
-      "GET /api/attendance/employees",
-      "GET /api/attendance/employee/:id",
-    ],
+      'POST /api/attendance/upload',
+      'GET /api/attendance/dashboard',
+      'GET /api/attendance/employees',
+      'GET /api/attendance/employee/:id'
+    ]
   });
 });
 
-/* =======================
-   ERROR HANDLER
-======================= */
-app.use((err, req, res, next) => {
-  console.error("Server Error:", err.message);
-  res.status(500).json({ error: err.message });
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error('Server error:', error);
+  res.status(500).json({ error: error.message || 'Internal server error' });
 });
 
-/* =======================
-   START SERVER (RENDER)
-======================= */
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For Vercel, we export the app instead of listening
+if (process.env.NODE_ENV === 'production') {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
