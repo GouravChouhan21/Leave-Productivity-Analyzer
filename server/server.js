@@ -43,12 +43,14 @@ app.use(cors({
       'https://leave-productivity-analyzer.vercel.app',
       'https://leave-productivity-analyzer-git-main-chouhangourav756-7067s-projects.vercel.app',
       'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app',
-      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app'
+      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app',
+      'https://leave-productivity-analyzer1-njfejixpt.vercel.app'
     ]
     : [
       'http://localhost:3000',
       'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app',
-      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app'
+      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app',
+      'https://leave-productivity-analyzer1-njfejixpt.vercel.app'
     ],
   credentials: true
 }));
