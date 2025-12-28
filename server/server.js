@@ -89,11 +89,10 @@ app.use((error, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// For Vercel, we export the app instead of listening
-if (process.env.NODE_ENV === 'production') {
-  module.exports = app;
-} else {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+// Always listen on the port for Render deployment
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Also export for Vercel compatibility
+module.exports = app;
