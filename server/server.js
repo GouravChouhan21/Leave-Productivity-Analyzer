@@ -52,7 +52,6 @@ app.use(cors({
     ],
   credentials: true
 }));
-    ]
     : [
   'http://localhost:3000',
   'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app'
