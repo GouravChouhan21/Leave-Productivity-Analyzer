@@ -36,24 +36,41 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-// Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [
-      'https://leave-productivity-analyzer.vercel.app',
-      'https://leave-productivity-analyzer-git-main-chouhangourav756-7067s-projects.vercel.app',
-      'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app',
-      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app',
-      'https://leave-productivity-analyzer1-njfejixpt.vercel.app'
-    ]
-    : [
-      'http://localhost:3000',
-      'https://leave-productivity-analyzer1-hu3qj4t60.vercel.app',
-      'https://leave-productivity-analyzer1-f3o6x7pm2.vercel.app',
-      'https://leave-productivity-analyzer1-njfejixpt.vercel.app'
-    ],
-  credentials: true
-}));
+/* =========================
+   ✅ FIXED CORS CONFIG
+   (Only this section changed)
+========================= */
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl)
+      if (!origin) return callback(null, true);
+
+      // Allow localhost (dev)
+      if (origin.startsWith('http://localhost')) {
+        return callback(null, true);
+      }
+
+      // Allow ALL Vercel deployments (prod & preview)
+      if (origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      // Otherwise block
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
+// Handle preflight requests
+app.options('*', cors());
+
+/* =========================
+   BODY PARSERS
+========================= */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
